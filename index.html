@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Galeria CRUD - Vitrine de Celulares</title>
+  <title>Galeria CRUD - Cloudinary</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -57,7 +57,7 @@
     .dot {
       width: 6px;
       height: 6px;
-      background-color: #3b82f6;
+      background-color: #db2777;
       border-radius: 50%;
       animation: bounce 1.2s infinite;
     }
@@ -73,25 +73,24 @@
     }
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-100 to-blue-200 min-h-screen flex flex-col items-center justify-start p-4 sm:p-6">
+<body class="bg-gradient-to-br from-pink-100 to-pink-200 min-h-screen flex flex-col items-center justify-start p-4 sm:p-6">
 
-  <h1 class="text-xl sm:text-2xl font-bold text-center text-blue-600 mb-4 sm:mb-6 flex items-center justify-center gap-2">
-    <i data-lucide="smartphone" class="w-6 h-6 sm:w-7 sm:h-7"></i> Vitrine de Celulares - Administração
+  <h1 class="text-xl sm:text-2xl font-bold text-center text-pink-600 mb-4 sm:mb-6 flex items-center justify-center gap-2">
+    <i data-lucide="image" class="w-6 h-6 sm:w-7 sm:h-7"></i> Galeria I Lash
   </h1>
 
   <div class="w-full max-w-md bg-white p-4 sm:p-6 rounded-2xl shadow-lg mb-4 sm:mb-6">
     <div class="flex flex-col gap-4">
-      <input type="file" id="fileInput" accept="image/*" class="w-full border rounded-lg p-2 sm:p-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400 outline-none">
-      <input type="text" id="modeloInput" placeholder="Nome do modelo do celular" class="w-full border rounded-lg p-2 sm:p-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400 outline-none">
-      <textarea id="descricaoInput" placeholder="Descrição do celular" class="w-full border rounded-lg p-2 sm:p-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400 outline-none" rows="4"></textarea>
-      <button onclick="uploadCelular()" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium transition text-sm sm:text-base">
-        Adicionar Celular
+      <input type="file" id="fileInput" class="w-full border rounded-lg p-2 sm:p-3 text-sm sm:text-base focus:ring-2 focus:ring-pink-400 outline-none">
+      <input type="text" id="tituloInput" placeholder="Título da imagem" class="w-full border rounded-lg p-2 sm:p-3 text-sm sm:text-base focus:ring-2 focus:ring-pink-400 outline-none">
+      <button onclick="uploadImagem()" class="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium transition text-sm sm:text-base">
+        Adicionar Imagem
       </button>
     </div>
   </div>
 
-  <button id="btnAtualizar" onclick="atualizarGaleria()" class="bg-blue-500 hover:bg-blue-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium transition text-sm sm:text-base mb-4 sm:mb-6">
-    Atualizar Vitrine
+  <button id="btnAtualizar" onclick="atualizarGaleria()" class="bg-pink-500 hover:bg-pink-600 text-white py-2 sm:py-3 px-4 rounded-lg font-medium transition text-sm sm:text-base mb-4 sm:mb-6">
+    Atualizar Galeria
   </button>
 
   <div class="w-full max-w-4xl relative">
@@ -100,7 +99,7 @@
         <img src="https://cdn-icons-png.flaticon.com/512/414/414927.png" 
              alt="Nuvem flutuante" 
              class="w-12 mx-auto mb-4 float-cloud">
-        <p class="text-sm text-gray-600 font-medium">Carregando vitrine</p>
+        <p class="text-sm text-gray-600 font-medium">Carregando galeria</p>
         <div class="dots">
           <div class="dot"></div>
           <div class="dot"></div>
@@ -114,50 +113,41 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
   <script>
-    // === CONFIGURAÇÕES PRINCIPAIS ===
     const CLOUDINARY_CLOUD_NAME = 'dnztotzyj';
-    const CLOUDINARY_UPLOAD_PRESET = 'Galeria';  // Exato como no console (Unsigned)
+    const CLOUDINARY_UPLOAD_PRESET = 'Galeria';
     const CLOUDINARY_API_KEY = '193279191131553';
     const CLOUDINARY_API_SECRET = '_h176LDmDT6PN7-A3pmLAejUffA';  
     const MOCKAPI_URL = 'https://68f458d8b16eb6f46834542c.mockapi.io/Rexord/Galeria';
 
     const galeriaLoading = document.getElementById('galeriaLoading');
 
-    // === FUNÇÃO: Atualizar Galeria ===
     async function atualizarGaleria() {
       galeriaLoading.classList.remove('hidden');
       try {
-        console.log('Iniciando carregamento da galeria...');
         const res = await fetch(MOCKAPI_URL);
-        if (!res.ok) throw new Error(`Erro HTTP ${res.status}: ${res.statusText}`);
-        const celulares = await res.json();
-        console.log('Dados recebidos do MockAPI:', celulares);
-
+        const imagens = await res.json();
         const galeria = document.getElementById('galeria');
         galeria.innerHTML = "";
 
-        celulares.forEach((item, index) => {
+        imagens.forEach((img, index) => {
           const div = document.createElement('div');
           div.className = 'card bg-white rounded-xl shadow-md overflow-hidden relative';
           div.style.animationDelay = `${index * 0.1}s`;
           div.innerHTML = `
-            <div class="image-loading" id="loading-${item.id}">
+            <div class="image-loading" id="loading-${img.id}">
               <div class="dots">
                 <div class="dot"></div>
                 <div class="dot"></div>
                 <div class="dot"></div>
               </div>
             </div>
-            <img src="${item.url}" alt="${item.modelo}" class="w-full h-40 sm:h-48 object-cover hover:scale-105 transition-transform duration-300" 
-                 onload="document.getElementById('loading-${item.id}').style.display='none'"
-                 onerror="console.error('Erro ao carregar imagem:', '${item.url}'); document.getElementById('loading-${item.id}').innerHTML='<p class=\\'text-red-500\\'>Imagem não carregada</p>'">
-            <p class="p-3 text-sm sm:text-base font-medium text-gray-800 text-center">${item.modelo}</p>
-            <p class="px-3 pb-3 text-sm text-gray-600 text-center">${item.descricao}</p>
+            <img src="${img.url}" alt="${img.titulo}" class="w-full h-40 sm:h-48 object-cover hover:scale-105 transition-transform duration-300" onload="document.getElementById('loading-${img.id}').style.display='none'">
+            <p class="p-3 text-sm sm:text-base font-medium text-gray-800 text-center">${img.titulo}</p>
             <div class="absolute top-2 right-2 flex gap-2">
-              <button class="edit bg-blue-500 hover:bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition" onclick="editarCelular('${item.id}', '${item.modelo.replace(/'/g, "\\'")}', '${item.descricao.replace(/'/g, "\\'")}')">
+              <button class="edit bg-pink-500 hover:bg-pink-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition" onclick="editarImagem('${img.id}', '${img.titulo}')">
                 <i data-lucide="edit" class="w-4 h-4"></i>
               </button>
-              <button class="delete bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition" onclick="deletarCelular('${item.id}', '${item.public_id}')">
+              <button class="delete bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition" onclick="deletarImagem('${img.id}', '${img.public_id}')">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -165,154 +155,103 @@
           galeria.appendChild(div);
         });
         lucide.createIcons();
-        console.log('Galeria atualizada com sucesso.');
       } catch (err) {
-        console.error('Erro ao carregar a galeria:', err);
-        alert("Erro ao carregar a vitrine. Verifique o console do navegador (F12).");
+        console.error(err);
+        alert("Erro ao carregar a galeria");
       } finally {
         galeriaLoading.classList.add('hidden');
       }
     }
 
-    // === FUNÇÃO: Upload de Celular (CORRIGIDO: SEM api_key no FormData) ===
-    async function uploadCelular() {
+    async function uploadImagem() {
       const file = document.getElementById('fileInput').files[0];
-      const modelo = document.getElementById('modeloInput').value.trim();
-      const descricao = document.getElementById('descricaoInput').value.trim();
-
-      if (!file || !modelo || !descricao) {
-        console.warn('Validação falhou: campos obrigatórios ausentes.');
-        alert("Selecione uma imagem, insira o nome do modelo e a descrição!");
+      const titulo = document.getElementById('tituloInput').value;
+      if (!file || !titulo) {
+        alert("Selecione uma imagem e insira um título!");
         return;
       }
 
-      console.log('Iniciando upload para Cloudinary...', { fileName: file.name, modelo, descricao });
       galeriaLoading.classList.remove('hidden');
 
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);  // Apenas isso para unsigned!
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
       const xhr = new XMLHttpRequest();
       xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`);
-
       xhr.onload = async () => {
-        console.log('Resposta Cloudinary - Status:', xhr.status);
-        if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const data = JSON.parse(xhr.responseText);
-            console.log('Upload na Cloudinary bem-sucedido:', data);
-
-            if (!data.secure_url || !data.public_id) {
-              throw new Error('Resposta da Cloudinary incompleta: faltam secure_url ou public_id');
-            }
-
-            console.log('Salvando dados no MockAPI...');
-            const mockRes = await fetch(MOCKAPI_URL, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ modelo, descricao, url: data.secure_url, public_id: data.public_id })
-            });
-
-            if (!mockRes.ok) throw new Error(`Erro ao salvar no MockAPI: ${mockRes.status}`);
-            console.log('Dados salvos no MockAPI com sucesso.');
-
-            // Limpar formulário
-            document.getElementById('fileInput').value = "";
-            document.getElementById('modeloInput').value = "";
-            document.getElementById('descricaoInput').value = "";
-
-            setTimeout(atualizarGaleria, 500);
-          } catch (err) {
-            console.error('Erro ao processar resposta da Cloudinary ou MockAPI:', err);
-            alert("Upload falhou. Verifique o console (F12) para detalhes.");
-          }
-        } else {
-          const erro = JSON.parse(xhr.responseText || '{}');
-          console.error('Erro HTTP no upload Cloudinary:', xhr.status, erro);
-          alert(`Upload falhou (HTTP ${xhr.status}): ${erro.error?.message || 'Desconhecido'}. Verifique o console.`);
+        const data = JSON.parse(xhr.responseText);
+        if (!data.secure_url) {
+          alert("Upload falhou");
+          galeriaLoading.classList.add('hidden');
+          return;
         }
-        galeriaLoading.classList.add('hidden');
-      };
 
+        await fetch(MOCKAPI_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ titulo: titulo, url: data.secure_url, public_id: data.public_id })
+        });
+
+        document.getElementById('fileInput').value = "";
+        document.getElementById('tituloInput').value = "";
+        setTimeout(atualizarGaleria, 500);
+      };
       xhr.onerror = () => {
-        console.error('Erro de rede ao enviar para Cloudinary.');
-        alert("Erro de conexão com a Cloudinary. Verifique sua internet.");
+        alert("Erro ao enviar a imagem.");
         galeriaLoading.classList.add('hidden');
       };
-
       xhr.send(formData);
     }
 
-    // === FUNÇÃO: Deletar Celular ===
-    async function deletarCelular(id, public_id) {
-      if (!confirm("Deseja realmente excluir este celular?")) return;
+    async function deletarImagem(id, public_id) {
+      if (!confirm("Deseja realmente excluir esta imagem?")) return;
 
-      console.log('Iniciando exclusão...', { id, public_id });
       galeriaLoading.classList.remove('hidden');
 
       try {
-        // Excluir da Cloudinary (requer assinatura)
-        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/destroy`;
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/destroy`;
         const timestamp = Math.floor(Date.now() / 1000);
         const payload = `public_id=${public_id}&timestamp=${timestamp}${CLOUDINARY_API_SECRET}`;
         const hash = CryptoJS.SHA1(payload).toString();
 
-        const cloudRes = await fetch(url, {
+        await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ public_id, timestamp, api_key: CLOUDINARY_API_KEY, signature: hash })
         });
 
-        if (!cloudRes.ok) {
-          const errText = await cloudRes.text();
-          throw new Error(`Erro ao excluir da Cloudinary: ${cloudRes.status} - ${errText}`);
-        }
-        console.log('Imagem excluída da Cloudinary.');
-
-        // Excluir do MockAPI
-        const mockRes = await fetch(`${MOCKAPI_URL}/${id}`, { method: "DELETE" });
-        if (!mockRes.ok) throw new Error(`Erro ao excluir do MockAPI: ${mockRes.status}`);
-        console.log('Registro excluído do MockAPI.');
-
+        await fetch(`${MOCKAPI_URL}/${id}`, { method: "DELETE" });
         setTimeout(atualizarGaleria, 500);
       } catch (err) {
-        console.error('Erro na exclusão:', err);
-        alert("Erro ao deletar celular. Verifique o console (F12).");
+        console.error(err);
+        alert("Erro ao deletar imagem");
         galeriaLoading.classList.add('hidden');
       }
     }
 
-    // === FUNÇÃO: Editar Celular ===
-    async function editarCelular(id, modeloAtual, descricaoAtual) {
-      const novoModelo = prompt("Digite o novo nome do modelo:", modeloAtual);
-      if (!novoModelo?.trim()) return;
-      const novaDescricao = prompt("Digite a nova descrição:", descricaoAtual);
-      if (!novaDescricao?.trim()) return;
+    async function editarImagem(id, tituloAtual) {
+      const novoTitulo = prompt("Digite o novo título:", tituloAtual);
+      if (!novoTitulo) return;
 
-      console.log('Editando item...', { id, novoModelo, novaDescricao });
       galeriaLoading.classList.remove('hidden');
 
       try {
-        const res = await fetch(`${MOCKAPI_URL}/${id}`, {
+        await fetch(`${MOCKAPI_URL}/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ modelo: novoModelo.trim(), descricao: novaDescricao.trim() })
+          body: JSON.stringify({ titulo: novoTitulo })
         });
-
-        if (!res.ok) throw new Error(`Erro ao atualizar MockAPI: ${res.status}`);
-        console.log('Item atualizado com sucesso.');
 
         setTimeout(atualizarGaleria, 500);
       } catch (err) {
-        console.error('Erro ao editar:', err);
-        alert("Erro ao atualizar informações. Verifique o console (F12).");
+        console.error(err);
+        alert("Erro ao atualizar título");
         galeriaLoading.classList.add('hidden');
       }
     }
 
-    // === INICIALIZAÇÃO ===
-    console.log('Sistema inicializado. Carregando galeria...');
+    // Carrega a galeria inicialmente
     atualizarGaleria();
   </script>
 </body>
